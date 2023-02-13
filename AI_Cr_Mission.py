@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from PIL import Image
-import urllib.request, time, threading, glob, tensorflow as tf, pandas as pd, matplotlib.pyplot as plt, numpy as np
+import urllib.request, time, threading, glob, tensorflow as tf, pandas as pd, matplotlib.pyplot as plt, numpy as np, os
 
 path = "chrome_driver(230206)\\chromedriver.exe"
 driver_tr1 = webdriver.Chrome(path)
@@ -37,7 +37,18 @@ def find_park(z, driver_tr):
         if get_count == 3: break
 
     K_imgs = driver_tr.find_elements(By.CSS_SELECTOR, ".rg_i.Q4LuWd")
+    
 
+    def createDirectory(dir):
+        try:
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+        except OSError:
+            print("디렉토리 생성 실패".format(dir))
+
+    createDirectory(z)
+    
+    
     count = 1
     for K_img in K_imgs:
         try:
@@ -50,9 +61,9 @@ def find_park(z, driver_tr):
             opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
             urllib.request.install_opener(opener)
             
-            urllib.request.urlretrieve(K_img_big_url, "AI_Cr/"+ z + "/" + str(count) + ".png")
-            Image.open("AI_Cr/"+ z + "/" + str(count) + ".png").resize((100,100), Image.ANTIALIAS).save("AI_Cr/"+ z + "/" + str(count) + ".png", "png")
-            im_small_tr = plt.imread("AI_Cr/"+ z + "/" + str(count) + ".png")
+            urllib.request.urlretrieve(K_img_big_url, z + "/" + str(count) + ".png")
+            Image.open(z + "/" + str(count) + ".png").resize((100,100), Image.ANTIALIAS).save(z + "/" + str(count) + ".png", "png")
+            im_small_tr = plt.imread(z + "/" + str(count) + ".png")
             im_small_li = np.array(im_small_tr.shape)
             if im_small_li[-1] != 3:
                 continue
@@ -88,7 +99,7 @@ time.sleep(4)   # ML 텀 적용
 
 
 #(1) 데이터
-paths = glob.glob('.\\AI_Cr\\*\\*.png')
+paths = glob.glob('.\\*\\*.png')
 paths = np.random.permutation(paths)
     
 independent = np.array([plt.imread(paths[i]) for i in range(len(paths))])
